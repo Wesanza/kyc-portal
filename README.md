@@ -2,6 +2,10 @@
 # Employee KYC Portal
 
 A full-stack internal HR/Compliance web application built to explore and demonstrate key backend engineering concepts: async task queues, caching strategies, real-time notifications, JWT auth flows, secure file storage, and role-based access control, within a realistic, end-to-end product context.
+<img width="1052" height="630" alt="image" src="https://github.com/user-attachments/assets/af0ebaa7-250d-4656-84a6-8d930256d9e1" />
+
+<img width="924" height="753" alt="image" src="https://github.com/user-attachments/assets/1509b9ea-67fc-4bd0-9132-83d1a8d4dcc7" />
+
 
 ## What This Project Demonstrates
 
@@ -59,45 +63,6 @@ kyc-portal/
 └── Makefile            # Dev shortcuts
 ```
 
----
-
-## Getting Started
-
-### Prerequisites
-
-* Docker + Docker Compose
-* Node.js 20+ (for frontend-only development without Docker)
-* Python 3.12+ (for backend-only development without Docker)
-
-### 1. Clone & configure environment
-
-```bash
-git clone https://github.com/your-username/kyc-portal.git
-cd kyc-portal
-cp .env.example .env
-# Edit .env — fill in SECRET_KEY, DB credentials, Redis URL, S3 config
-```
-
-### 2. Start with Docker Compose
-
-```bash
-docker-compose up --build
-```
-
-This starts:
-
-* `db` — PostgreSQL on port 5432
-* `redis` — Redis on port 6379
-* `backend` — Django dev server on port 8000
-* `celery` — Celery worker (same image, different command)
-* `frontend` — Vite dev server on port 5173
-
-### 3. Run migrations & create a superuser
-
-```bash
-docker-compose exec backend python manage.py migrate
-docker-compose exec backend python manage.py createsuperuser
-```
 
 ### 4. Access the app
 
@@ -106,73 +71,6 @@ docker-compose exec backend python manage.py createsuperuser
 | Frontend     | http://localhost:5173               |
 | Backend API  | http://localhost:8000/api/          |
 | Django Admin | http://localhost:8000/django-admin/ |
-
----
-
-## Running Without Docker
-
-### Backend
-
-```bash
-cd kyc_backend
-python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements/dev.txt
-python manage.py migrate
-python manage.py runserver
-```
-
-Start the Celery worker in a separate terminal:
-
-```bash
-celery -A celery_worker worker --loglevel=info
-```
-
-### Frontend
-
-```bash
-cd kyc_frontend
-npm install
-npm run dev
-```
-
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and fill in the values. **Never commit `.env`.**
-
-```bash
-# Django
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-FRONTEND_BASE_URL=http://localhost:5173
-
-# Database
-DATABASE_URL=postgres://kyc_user:kyc_pass@localhost:5432/kyc_db
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-
-# Celery
-CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/1
-
-# Email (use console backend in dev)
-EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-DEFAULT_FROM_EMAIL=noreply@kyc.internal
-
-# File storage (leave blank in dev to use local MEDIA_ROOT)
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_STORAGE_BUCKET_NAME=
-AWS_S3_REGION_NAME=
-
-# Invite config
-INVITE_EXPIRY_DAYS=30
-NOTIFICATIONS_ENABLED=True
-```
 
 ---
 
@@ -263,21 +161,3 @@ NOTIFICATIONS_ENABLED=True
 | All sections =`APPROVED`                    | `APPROVED`           |
 
 ---
-
-## Running Tests
-
-```bash
-# Backend
-cd kyc_backend
-pytest --cov=. --cov-report=term-missing
-
-# Frontend
-cd kyc_frontend
-npm run test
-```
-
----
-
-## License
-
-MIT — see [LICENSE](https://claude.ai/chat/LICENSE) for details.
