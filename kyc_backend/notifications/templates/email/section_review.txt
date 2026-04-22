@@ -1,0 +1,15 @@
+Hello {{ full_name }},
+
+Your "{{ section_label }}" section has been reviewed.
+
+Status: {{ new_status }}
+{% if reviewer_notes %}
+Reviewer Notes:
+{{ reviewer_notes }}
+{% endif %}
+{% if new_status != "APPROVED" %}
+Please log in to the portal to update your submission:
+{{ portal_url }}
+{% endif %}
+
+— KYC Portal

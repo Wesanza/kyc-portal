@@ -1,0 +1,11 @@
+{% extends "email/base.html" %}
+{% block subject %}Your KYC Onboarding Invitation{% endblock %}
+{% block content %}
+<p>Hello <strong>{{ full_name }}</strong>,</p>
+<p>You have been invited to complete your KYC (Know Your Customer) verification as part of your onboarding process.</p>
+<p>Please click the button below to begin. Your invite link is valid for <strong>{{ expiry_days }} days</strong>.</p>
+<p><a class="btn" href="{{ invite_url }}">Begin KYC Submission</a></p>
+<p class="muted">If the button above doesn't work, copy and paste this link into your browser:</p>
+<p class="muted" style="word-break:break-all;">{{ invite_url }}</p>
+<p class="muted">This link will expire in {{ expiry_days }} days. If it expires, please contact HR to request a new one.</p>
+{% endblock %}

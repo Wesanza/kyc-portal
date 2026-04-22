@@ -1,0 +1,33 @@
+{% extends "email/base.html" %}
+{% block subject %}KYC Update: {{ section_label }}{% endblock %}
+{% block content %}
+<p>Hello <strong>{{ full_name }}</strong>,</p>
+
+{% if new_status == "APPROVED" %}
+<p>Great news! Your <strong>{{ section_label }}</strong> section has been reviewed and approved.</p>
+<span class="section-badge badge-approved">✓ Approved</span>
+
+{% elif new_status == "REJECTED" %}
+<p>Unfortunately, your <strong>{{ section_label }}</strong> section could not be accepted in its current form.</p>
+<span class="section-badge badge-rejected">✗ Rejected</span>
+{% if reviewer_notes %}
+<div class="notes-box"><strong>Reviewer Notes:</strong><br>{{ reviewer_notes }}</div>
+{% endif %}
+<p>Please log in to the portal and resubmit this section addressing the feedback above.</p>
+<p><a class="btn" href="{{ portal_url }}">Update Submission</a></p>
+
+{% elif new_status == "REVISION_REQUESTED" %}
+<p>A revision has been requested for your <strong>{{ section_label }}</strong> section.</p>
+<span class="section-badge badge-revision">↩ Revision Requested</span>
+{% if reviewer_notes %}
+<div class="notes-box"><strong>What to fix:</strong><br>{{ reviewer_notes }}</div>
+{% endif %}
+<p>Please log in to the portal and update your submission based on the feedback.</p>
+<p><a class="btn" href="{{ portal_url }}">Update Submission</a></p>
+
+{% else %}
+<p>Your <strong>{{ section_label }}</strong> section status has been updated to <strong>{{ new_status }}</strong>.</p>
+{% endif %}
+
+<p class="muted">Log in to the portal to view your full KYC progress.</p>
+{% endblock %}

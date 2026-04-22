@@ -1,0 +1,10 @@
+Hello {{ full_name }},
+
+You have been invited to complete your KYC verification as part of your onboarding.
+
+Click the link below to begin (valid for {{ expiry_days }} days):
+{{ invite_url }}
+
+If your link expires, contact HR to request a new one.
+
+— KYC Portal

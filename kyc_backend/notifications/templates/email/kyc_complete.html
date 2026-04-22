@@ -1,0 +1,11 @@
+{% extends "email/base.html" %}
+{% block subject %}Your KYC Submission is Complete!{% endblock %}
+{% block content %}
+<p>Hello <strong>{{ full_name }}</strong>,</p>
+<p style="font-size:18px;">🎉 <strong>Congratulations!</strong></p>
+<p>All of your KYC sections have been reviewed and <strong>approved</strong>. Your onboarding verification is now complete.</p>
+<span class="section-badge badge-approved" style="font-size:15px; padding: 8px 16px;">✓ KYC Complete</span>
+<p style="margin-top: 24px;">You can view your completed KYC record at any time by logging into the portal.</p>
+<p><a class="btn" href="{{ portal_url }}">View My KYC Status</a></p>
+<p class="muted">HR has been notified and will be in touch regarding next steps in your onboarding.</p>
+{% endblock %}

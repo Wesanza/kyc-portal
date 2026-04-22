@@ -1,0 +1,9 @@
+Hello {{ full_name }},
+
+Congratulations! All of your KYC sections have been approved.
+
+Your onboarding verification is now complete. HR has been notified and will be in touch.
+
+View your KYC status: {{ portal_url }}
+
+— KYC Portal
