@@ -59,6 +59,9 @@ const ContactDetailsPage = lazy(() =>
 const NextOfKinPage = lazy(() =>
   import('../features/applicant/kyc').then((m) => ({ default: m.NextOfKinPage }))
 );
+const ReferredByPage = lazy(() =>
+  import('../features/applicant/kyc').then((m) => ({ default: m.ReferredByPage }))
+);
 
 // ── Loading fallback ────────────────────────────────────────────────────────
 const PageLoader: React.FC = () => (
@@ -129,13 +132,15 @@ const router = createBrowserRouter([
 
       // FE-03-02 through FE-03-09: KYC section submission pages
       { path: 'kyc/employment-contract', element: <EmploymentContractPage /> },
-      { path: 'kyc/payslips', element: <PayslipsPage /> },
-      { path: 'kyc/identity', element: <IdentityPage /> },
-      { path: 'kyc/home-address', element: <HomeAddressPage /> },
-      { path: 'kyc/office-address', element: <OfficeAddressPage /> },
-      { path: 'kyc/social-media', element: <SocialMediaPage /> },
-      { path: 'kyc/contact-details', element: <ContactDetailsPage /> },
-      { path: 'kyc/next-of-kin', element: <NextOfKinPage /> },
+      { path: 'kyc/payslips',            element: <PayslipsPage /> },
+      { path: 'kyc/identity',            element: <IdentityPage /> },
+      { path: 'kyc/home-address',        element: <HomeAddressPage /> },
+      { path: 'kyc/office-address',      element: <OfficeAddressPage /> },
+      { path: 'kyc/social-media',        element: <SocialMediaPage /> },
+      { path: 'kyc/contact-details',     element: <ContactDetailsPage /> },
+      { path: 'kyc/next-of-kin',         element: <NextOfKinPage /> },
+      // FE-03-10: Referred by
+      { path: 'kyc/referred-by',         element: <ReferredByPage /> },
     ],
   },
 
@@ -154,19 +159,21 @@ const router = createBrowserRouter([
       { path: "settings",         element: <SettingsPage /> },
     ],
   },
-{
-  path: '/no-session',
-  element: (
-    <div className="min-h-screen bg-mint-surface flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl border border-light-gray shadow-card p-8 max-w-sm w-full text-center">
-        <h1 className="text-xl font-display font-bold text-charcoal mb-2">Session Expired</h1>
-        <p className="text-sm font-body text-medium-gray leading-relaxed">
-          Please use the invite link sent to your email to access the portal.
-        </p>
+
+  {
+    path: '/no-session',
+    element: (
+      <div className="min-h-screen bg-mint-surface flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl border border-light-gray shadow-card p-8 max-w-sm w-full text-center">
+          <h1 className="text-xl font-display font-bold text-charcoal mb-2">Session Expired</h1>
+          <p className="text-sm font-body text-medium-gray leading-relaxed">
+            Please use the invite link sent to your email to access the portal.
+          </p>
+        </div>
       </div>
-    </div>
-  ),
-},
+    ),
+  },
+
   // 404
   {
     path: '*',

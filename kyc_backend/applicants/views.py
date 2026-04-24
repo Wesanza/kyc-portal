@@ -50,7 +50,7 @@ class ApplicantViewSet(ModelViewSet):
         applicant = serializer.save()
         # Fire invite email async
         from notifications.tasks import send_invite_email
-        send_invite_email.delay(str(applicant.pk))
+        send_invite_email(str(applicant.pk))
 
     def perform_destroy(self, instance):
         """Soft-delete only."""
@@ -66,7 +66,7 @@ class ApplicantViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         from notifications.tasks import send_invite_email
-        send_invite_email.delay(str(applicant.pk))
+        send_invite_email(str(applicant.pk))
         return Response({"detail": "Invite email queued for delivery."})
 
     @action(detail=True, methods=["post"], url_path="regenerate-invite")
@@ -75,7 +75,7 @@ class ApplicantViewSet(ModelViewSet):
         applicant.regenerate_invite()
         applicant.save(update_fields=["invite_token", "invite_used", "invite_expires_at", "updated_at"])
         from notifications.tasks import send_invite_email
-        send_invite_email.delay(str(applicant.pk))
+        send_invite_email(str(applicant.pk))
         return Response(
             {"detail": "Invite regenerated.", "invite_url": applicant.invite_url},
         )
@@ -99,7 +99,7 @@ class InviteValidateView(APIView):
     Validates the invite token and issues a session token.
     """
     permission_classes = [AllowAny]
-
+    authentication_classes = []
     def get(self, request: Request, token: str) -> Response:
         try:
             applicant = Applicant.objects.get(invite_token=token, is_active=True)

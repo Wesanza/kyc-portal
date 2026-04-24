@@ -11,6 +11,7 @@ const SECTION_TO_ENDPOINT: Record<KycSectionKey, string> = {
   social_media: 'social-media',
   contact_details: 'contact-details',
   next_of_kin: 'next-of-kin',
+  referred_by: 'referred-by'
 };
 
 export const reviewSection = (

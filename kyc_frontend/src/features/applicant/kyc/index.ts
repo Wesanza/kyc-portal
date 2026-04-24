@@ -6,3 +6,4 @@ export { default as OfficeAddressPage } from './OfficeAddressPage';
 export { default as SocialMediaPage } from './SocialMediaPage';
 export { default as ContactDetailsPage } from './ContactDetailsPage';
 export { default as NextOfKinPage } from './NextOfKinPage';
+export { default as ReferredByPage } from './ReferredByPage';

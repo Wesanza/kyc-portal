@@ -15,7 +15,8 @@ export type KycSectionKey =
   | 'office_address'
   | 'social_media'
   | 'contact_details'
-  | 'next_of_kin';
+  | 'next_of_kin'
+  | 'referred_by';
 
 export interface SectionStatus {
   section: KycSectionKey;
@@ -67,6 +68,7 @@ export interface AddressPayload {
 export interface SocialMediaPayload {
   facebook_url?: string;
   instagram_url?: string;
+  linkedin_url?: string;
 }
 
 export interface ContactDetailsPayload {
@@ -79,4 +81,12 @@ export interface NextOfKinPayload {
   relationship: string;
   phone_primary: string;
   phone_secondary?: string;
+}
+
+export interface ReferredByPayload {
+  referrer_name: string;
+  referrer_relationship: string;
+  referrer_phone?: string;
+  referrer_email?: string;
+  notes?: string;
 }

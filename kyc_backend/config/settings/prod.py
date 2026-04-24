@@ -37,7 +37,7 @@ X_FRAME_OPTIONS = "DENY"
 # ---------------------------------------------------------------------------
 # Email via SMTP
 # ---------------------------------------------------------------------------
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config("EMAIL_HOST")  # noqa: F405
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)  # noqa: F405
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")  # noqa: F405

@@ -6,6 +6,7 @@ import {
   Mail, FileText, ExternalLink, ShieldCheck, ArrowLeft,
   MapPin, Phone, Facebook, Instagram, AlertCircle,
   CheckCircle2, Clock, XCircle, RotateCcw, Eye, User,
+  Linkedin,
 } from "lucide-react";
 import {
   getApplicant, getKycSummary, getKycSections,
@@ -273,7 +274,9 @@ const Field: React.FC<{ label: string; value: React.ReactNode }> = ({ label, val
   );
 };
 
-// ── Section data renderer ─────────────────────────────────────────────────────
+// ── Section data renderer — drop-in replacement for SectionDataView ──────────
+// Paste this function over the existing SectionDataView in ApplicantDetailPage.tsx
+
 function SectionDataView({ section, data }: { section: string; data: any }) {
   if (!data) return <p className="text-xs font-body text-medium-gray italic py-1">No data submitted yet.</p>;
 
@@ -371,7 +374,15 @@ function SectionDataView({ section, data }: { section: string; data: any }) {
               <Instagram className="w-3.5 h-3.5" /> Instagram <ExternalLink className="w-3 h-3 opacity-60" />
             </a>
           )}
-          {!data.facebook_url && !data.instagram_url && (
+          {data.linkedin_url && (
+            <a
+              href={data.linkedin_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-body font-medium text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Linkedin className="w-3.5 h-3.5" /> LinkedIn <ExternalLink className="w-3 h-3 opacity-60" />
+            </a>
+          )}
+          {!data.facebook_url && !data.instagram_url && !data.linkedin_url && (
             <p className="text-xs font-body text-medium-gray italic">No social profiles provided.</p>
           )}
         </div>
@@ -430,6 +441,53 @@ function SectionDataView({ section, data }: { section: string; data: any }) {
                 </a>
               }
             />
+          )}
+        </div>
+      );
+
+    case "referred_by":
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Referrer Name" value={data.referrer_name} />
+          <Field
+            label="Relationship"
+            value={
+              <span className="inline-flex items-center px-2.5 py-1 bg-mint-surface text-forest text-xs font-body font-semibold rounded-full">
+                {data.referrer_relationship}
+              </span>
+            }
+          />
+          {data.referrer_phone && (
+            <Field
+              label="Referrer Phone"
+              value={
+                <a href={`tel:${data.referrer_phone}`} className="inline-flex items-center gap-1.5 font-mono text-sm text-charcoal hover:text-forest transition-colors">
+                  <Phone className="w-3.5 h-3.5 text-forest" /> {data.referrer_phone}
+                </a>
+              }
+            />
+          )}
+          {data.referrer_email && (
+            <Field
+              label="Referrer Email"
+              value={
+                <a href={`mailto:${data.referrer_email}`} className="inline-flex items-center gap-1.5 text-sm text-charcoal hover:text-forest transition-colors">
+                  <Mail className="w-3.5 h-3.5 text-forest" /> {data.referrer_email}
+                </a>
+              }
+            />
+          )}
+          {data.notes && (
+            <div className="sm:col-span-2">
+              <Field
+                label="Notes"
+                value={
+                  <p className="text-xs font-body text-charcoal bg-mint-surface border border-forest/10 rounded-lg px-3 py-2 leading-relaxed">
+                    {data.notes}
+                  </p>
+                }
+              />
+            </div>
           )}
         </div>
       );

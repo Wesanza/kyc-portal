@@ -8,8 +8,15 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   const url = config.url ?? '';
 
+  // Public applicant routes — no auth header
+  const isPublicApplicantRoute =
+    url.includes('/invite/') && url.includes('/validate');
+
+  if (isPublicApplicantRoute) {
+    return config;
+  }
+
   if (url.startsWith('/applicant/')) {
-    // Read from Zustand's persisted localStorage key
     const applicantToken = (() => {
       try {
         const raw = localStorage.getItem('applicant-session');

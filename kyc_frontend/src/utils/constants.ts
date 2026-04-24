@@ -7,6 +7,7 @@ import {
   Share2,
   Phone,
   Users,
+  UserPlus,
 } from 'lucide-react';
 import type { KycSectionKey, KycStatus } from '../types/kyc';
 
@@ -59,7 +60,7 @@ export const KYC_SECTIONS: Array<{
   {
     key: 'social_media',
     label: 'Social Media',
-    description: 'Facebook and Instagram profile links',
+    description: 'Facebook, Instagram and LinkedIn profile links',
     icon: Share2,
     route: '/portal/kyc/social-media',
     required_docs: 'At least one required',
@@ -78,6 +79,13 @@ export const KYC_SECTIONS: Array<{
     icon: Users,
     route: '/portal/kyc/next-of-kin',
   },
+  {
+  key: 'referred_by',
+  label: 'Referred By',
+  description: 'Who referred you or how you heard about this role',
+  route: '/portal/kyc/referred-by',
+  icon: UserPlus,
+},
 ];
 
 export const STATUS_LABELS: Record<KycStatus, string> = {
