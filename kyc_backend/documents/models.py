@@ -10,7 +10,7 @@ from .validators import (
     validate_google_maps_url, extract_lat_lng,
     validate_kra_pin, validate_id_number,
     validate_kenyan_phone,
-    validate_facebook_url, validate_instagram_url,
+    validate_facebook_url, validate_instagram_url, validate_linkedin_url,
 )
 
 def employment_contract_upload_path(instance, filename: str) -> str:
@@ -26,17 +26,14 @@ def identity_upload_path(instance, filename: str) -> str:
     return f"kyc/{instance.applicant_id}/identity/{uuid.uuid4().hex}{ext}"
 
 def _upload_path(section: str):
-    """Return an upload_to callable that namespaces files by applicant/section."""
     def _path(instance, filename: str) -> str:
         ext = os.path.splitext(filename)[1].lower()
-        unique_name = f"{uuid.uuid4().hex}{ext}"
-        applicant_id = str(instance.applicant_id)
-        return f"kyc/{applicant_id}/{section}/{unique_name}"
+        return f"kyc/{instance.applicant_id}/{section}/{uuid.uuid4().hex}{ext}"
     return _path
 
 
 # ---------------------------------------------------------------------------
-# Abstract base shared by all KYC section models
+# Abstract base
 # ---------------------------------------------------------------------------
 
 class KYCSectionBase(models.Model):
@@ -65,7 +62,7 @@ class KYCSectionBase(models.Model):
 
 class EmploymentContract(KYCSectionBase):
     file = models.FileField(
-        upload_to=employment_contract_upload_path,  # ← no call brackets
+        upload_to=employment_contract_upload_path,
         validators=[validate_file_size, validate_file_extension],
     )
 
@@ -78,7 +75,7 @@ class EmploymentContract(KYCSectionBase):
 
 
 # ---------------------------------------------------------------------------
-# 2. Payslip (up to 3 per applicant, so FK not OneToOne)
+# 2. Payslip
 # ---------------------------------------------------------------------------
 
 class Payslip(models.Model):
@@ -91,7 +88,6 @@ class Payslip(models.Model):
         upload_to=payslip_upload_path,
         validators=[validate_file_size, validate_file_extension],
     )
-
     month_label = models.CharField(max_length=20, help_text='e.g. "March 2025"')
     is_certified = models.BooleanField(default=False)
     status = models.CharField(
@@ -161,10 +157,7 @@ class IdentityDocument(KYCSectionBase):
 
 class HomeAddress(KYCSectionBase):
     address_text = models.TextField()
-    google_maps_pin_url = models.URLField(
-        max_length=500,
-        validators=[validate_google_maps_url],
-    )
+    google_maps_pin_url = models.URLField(max_length=500, validators=[validate_google_maps_url])
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
 
@@ -179,8 +172,7 @@ class HomeAddress(KYCSectionBase):
         if self.google_maps_pin_url and (not self.latitude or not self.longitude):
             lat, lng = extract_lat_lng(self.google_maps_pin_url)
             if lat:
-                self.latitude = lat
-                self.longitude = lng
+                self.latitude, self.longitude = lat, lng
         super().save(*args, **kwargs)
 
 
@@ -190,10 +182,7 @@ class HomeAddress(KYCSectionBase):
 
 class OfficeAddress(KYCSectionBase):
     address_text = models.TextField()
-    google_maps_pin_url = models.URLField(
-        max_length=500,
-        validators=[validate_google_maps_url],
-    )
+    google_maps_pin_url = models.URLField(max_length=500, validators=[validate_google_maps_url])
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
 
@@ -208,25 +197,23 @@ class OfficeAddress(KYCSectionBase):
         if self.google_maps_pin_url and (not self.latitude or not self.longitude):
             lat, lng = extract_lat_lng(self.google_maps_pin_url)
             if lat:
-                self.latitude = lat
-                self.longitude = lng
+                self.latitude, self.longitude = lat, lng
         super().save(*args, **kwargs)
 
 
 # ---------------------------------------------------------------------------
-# 6. Social Media
+# 6. Social Media  (LinkedIn added)
 # ---------------------------------------------------------------------------
 
 class SocialMedia(KYCSectionBase):
     facebook_url = models.URLField(
-        max_length=300,
-        blank=True,
-        validators=[validate_facebook_url],
+        max_length=300, blank=True, validators=[validate_facebook_url]
     )
     instagram_url = models.URLField(
-        max_length=300,
-        blank=True,
-        validators=[validate_instagram_url],
+        max_length=300, blank=True, validators=[validate_instagram_url]
+    )
+    linkedin_url = models.URLField(
+        max_length=300, blank=True, validators=[validate_linkedin_url]
     )
 
     class Meta:
@@ -238,8 +225,10 @@ class SocialMedia(KYCSectionBase):
 
     def clean(self):
         from django.core.exceptions import ValidationError
-        if not self.facebook_url and not self.instagram_url:
-            raise ValidationError("At least one social media URL (Facebook or Instagram) is required.")
+        if not self.facebook_url and not self.instagram_url and not self.linkedin_url:
+            raise ValidationError(
+                "At least one social media URL (Facebook, Instagram, or LinkedIn) is required."
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -249,9 +238,7 @@ class SocialMedia(KYCSectionBase):
 class ContactDetails(KYCSectionBase):
     phone_primary = models.CharField(max_length=20, validators=[validate_kenyan_phone])
     phone_secondary = models.CharField(
-        max_length=20,
-        blank=True,
-        validators=[validate_kenyan_phone],
+        max_length=20, blank=True, validators=[validate_kenyan_phone]
     )
 
     class Meta:
@@ -268,24 +255,18 @@ class ContactDetails(KYCSectionBase):
 
 class NextOfKin(KYCSectionBase):
     class Relationship(models.TextChoices):
-        SPOUSE = "SPOUSE", "Spouse"
-        PARENT = "PARENT", "Parent"
+        SPOUSE  = "SPOUSE",  "Spouse"
+        PARENT  = "PARENT",  "Parent"
         SIBLING = "SIBLING", "Sibling"
-        CHILD = "CHILD", "Child"
-        OTHER = "OTHER", "Other"
+        CHILD   = "CHILD",   "Child"
+        OTHER   = "OTHER",   "Other"
 
     full_name = models.CharField(max_length=255)
     relationship = models.CharField(max_length=20, choices=Relationship.choices)
-    relationship_other = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text='Specify if relationship is "Other".',
-    )
+    relationship_other = models.CharField(max_length=100, blank=True)
     phone_primary = models.CharField(max_length=20, validators=[validate_kenyan_phone])
     phone_secondary = models.CharField(
-        max_length=20,
-        blank=True,
-        validators=[validate_kenyan_phone],
+        max_length=20, blank=True, validators=[validate_kenyan_phone]
     )
 
     class Meta:
@@ -299,3 +280,24 @@ class NextOfKin(KYCSectionBase):
         from django.core.exceptions import ValidationError
         if self.relationship == self.Relationship.OTHER and not self.relationship_other:
             raise ValidationError({"relationship_other": "Please specify the relationship."})
+
+
+# ---------------------------------------------------------------------------
+# 9. Referred By
+# ---------------------------------------------------------------------------
+
+class ReferredBy(KYCSectionBase):
+    referrer_name = models.CharField(max_length=255)
+    referrer_relationship = models.CharField(max_length=100)
+    referrer_phone = models.CharField(
+        max_length=20, blank=True, validators=[validate_kenyan_phone]
+    )
+    referrer_email = models.EmailField(max_length=254, blank=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Referred By"
+        verbose_name_plural = "Referred By Entries"
+
+    def __str__(self) -> str:
+        return f"ReferredBy ({self.referrer_name}) — {self.applicant}"

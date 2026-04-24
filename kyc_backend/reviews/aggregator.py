@@ -16,6 +16,27 @@ if TYPE_CHECKING:
 # Section → model lookup
 # ---------------------------------------------------------------------------
 
+def _get_section_model(section: str):
+    """Return the Django model class for a given section name."""
+    from documents.models import (
+        EmploymentContract, Payslip, IdentityDocument,
+        HomeAddress, OfficeAddress, SocialMedia,
+        ContactDetails, NextOfKin, ReferredBy,
+    )
+    mapping = {
+        "employment_contract": EmploymentContract,
+        "payslips":            Payslip,
+        "identity":            IdentityDocument,
+        "home_address":        HomeAddress,
+        "office_address":      OfficeAddress,
+        "social_media":        SocialMedia,
+        "contact_details":     ContactDetails,
+        "next_of_kin":         NextOfKin,
+        "referred_by":         ReferredBy,
+    }
+    return mapping[section]
+
+
 def _get_section_instance(applicant: "Applicant", section: str):
     """Return the section model instance or None if not yet submitted."""
     model = _get_section_model(section)
@@ -26,28 +47,9 @@ def _get_section_instance(applicant: "Applicant", section: str):
     except model.DoesNotExist:
         return None
 
-def _get_section_model(section: str):
-    """Return the Django model class for a given section name."""
-    from documents.models import (
-        EmploymentContract, Payslip, IdentityDocument,
-        HomeAddress, OfficeAddress, SocialMedia,
-        ContactDetails, NextOfKin,
-    )
-    mapping = {
-        "employment_contract": EmploymentContract,
-        "payslips": Payslip,
-        "identity": IdentityDocument,
-        "home_address": HomeAddress,
-        "office_address": OfficeAddress,
-        "social_media": SocialMedia,
-        "contact_details": ContactDetails,
-        "next_of_kin": NextOfKin,
-    }
-    return mapping[section]
-
 
 def _get_section_instance_data(applicant, section, request=None):
-    from reviews.serializers import get_section_serializer  
+    from reviews.serializers import get_section_serializer
 
     instance = _get_section_instance(applicant, section)
     if instance is None:
@@ -63,6 +65,7 @@ def _get_section_instance_data(applicant, section, request=None):
         return serializer_class(instance, many=True, context=context).data
     return serializer_class(instance, context=context).data
 
+
 # ---------------------------------------------------------------------------
 # Per-section status helper
 # ---------------------------------------------------------------------------
@@ -77,9 +80,13 @@ def _get_section_status(applicant: "Applicant", section: str) -> dict:
     if section == "payslips":
         payslips = list(model.objects.filter(applicant=applicant))
         if not payslips:
-            return {"section": section, "label": KYC_SECTION_LABELS[section],
-                    "status": "NOT_STARTED", "submitted_at": None, "reviewer_notes": ""}
-        # Aggregate: all APPROVED only if all are approved
+            return {
+                "section": section,
+                "label": KYC_SECTION_LABELS[section],
+                "status": "NOT_STARTED",
+                "submitted_at": None,
+                "reviewer_notes": "",
+            }
         statuses = [p.status for p in payslips]
         if all(s == "APPROVED" for s in statuses):
             agg_status = "APPROVED"
@@ -126,10 +133,9 @@ def _get_section_status(applicant: "Applicant", section: str) -> dict:
 
 def compute_overall_kyc_status(applicant: "Applicant") -> str:
     """
-    Derive overall KYC status from the 8 section statuses.
+    Derive overall KYC status from all section statuses.
 
-    Priority order:
-      INCOMPLETE > REJECTED > REVISION_REQUESTED > IN_REVIEW > APPROVED
+    Priority: INCOMPLETE > REJECTED > REVISION_REQUESTED > IN_REVIEW > APPROVED
     """
     section_data = [_get_section_status(applicant, s) for s in KYC_SECTIONS]
     statuses = [d["status"] for d in section_data]
@@ -146,7 +152,7 @@ def compute_overall_kyc_status(applicant: "Applicant") -> str:
 
 
 # ---------------------------------------------------------------------------
-# Full KYC summary (used by both admin and applicant status endpoints)
+# Full KYC summary
 # ---------------------------------------------------------------------------
 
 def build_kyc_summary(applicant: "Applicant") -> dict:

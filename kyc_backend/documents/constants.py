@@ -15,7 +15,7 @@ SECTION_STATUS_CHOICES = [
 DEFAULT_STATUS = "PENDING"
 
 # ---------------------------------------------------------------------------
-# All 8 KYC section identifiers (canonical ordering)
+# All KYC section identifiers (canonical ordering)
 # ---------------------------------------------------------------------------
 
 KYC_SECTIONS = [
@@ -27,6 +27,7 @@ KYC_SECTIONS = [
     "social_media",
     "contact_details",
     "next_of_kin",
+    "referred_by",
 ]
 
 KYC_SECTION_LABELS = {
@@ -38,6 +39,7 @@ KYC_SECTION_LABELS = {
     "social_media": "Social Media",
     "contact_details": "Contact Details",
     "next_of_kin": "Next of Kin",
+    "referred_by": "Referred By",
 }
 
 # ---------------------------------------------------------------------------

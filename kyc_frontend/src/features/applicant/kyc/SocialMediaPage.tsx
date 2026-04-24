@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { CheckCircle2, Facebook, Instagram, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Facebook, Instagram, Linkedin, AlertCircle } from 'lucide-react';
 import SectionPageWrapper from './SectionPageWrapper';
 import { Input } from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
@@ -11,6 +11,7 @@ import { useInvalidateKycStatus } from '../../../hooks/useKycStatus';
 interface Errors {
   facebook_url?: string;
   instagram_url?: string;
+  linkedin_url?: string;
   general?: string;
 }
 
@@ -30,22 +31,35 @@ const validateInstagram = (url: string): string | null => {
   return null;
 };
 
+const validateLinkedIn = (url: string): string | null => {
+  if (!url) return null;
+  if (!/^https?:\/\/(www\.)?linkedin\.com\/(in|pub)\/.+/.test(url)) {
+    return 'Must be a valid LinkedIn profile URL (linkedin.com/in/...)';
+  }
+  return null;
+};
+
 const SocialMediaPage: React.FC = () => {
   const [facebookUrl, setFacebookUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const [success, setSuccess] = useState(false);
   const invalidate = useInvalidateKycStatus();
 
+  const hasAtLeastOne = !!(facebookUrl || instagramUrl || linkedinUrl);
+
   const validate = (): boolean => {
     const errs: Errors = {};
-    if (!facebookUrl && !instagramUrl) {
+    if (!hasAtLeastOne) {
       errs.general = 'At least one social media profile is required';
     }
     const fbErr = validateFacebook(facebookUrl);
     if (fbErr) errs.facebook_url = fbErr;
     const igErr = validateInstagram(instagramUrl);
     if (igErr) errs.instagram_url = igErr;
+    const liErr = validateLinkedIn(linkedinUrl);
+    if (liErr) errs.linkedin_url = liErr;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -55,6 +69,7 @@ const SocialMediaPage: React.FC = () => {
       submitSocialMedia({
         ...(facebookUrl ? { facebook_url: facebookUrl } : {}),
         ...(instagramUrl ? { instagram_url: instagramUrl } : {}),
+        ...(linkedinUrl ? { linkedin_url: linkedinUrl } : {}),
       }),
     onSuccess: () => {
       setSuccess(true);
@@ -65,6 +80,10 @@ const SocialMediaPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) mutation.mutate();
+  };
+
+  const clearGeneralError = () => {
+    if (errors.general) setErrors((p) => ({ ...p, general: undefined }));
   };
 
   return (
@@ -108,11 +127,12 @@ const SocialMediaPage: React.FC = () => {
             value={facebookUrl}
             onChange={(e) => {
               setFacebookUrl(e.target.value);
-              if (errors.facebook_url) setErrors((p) => ({ ...p, facebook_url: undefined, general: undefined }));
+              if (errors.facebook_url) setErrors((p) => ({ ...p, facebook_url: undefined }));
+              clearGeneralError();
             }}
             error={errors.facebook_url}
             leftAddon={<Facebook className="w-4 h-4 text-blue-600" />}
-            helper="Optional if Instagram is provided"
+            helper="Optional if another profile is provided"
           />
 
           <Input
@@ -121,16 +141,31 @@ const SocialMediaPage: React.FC = () => {
             value={instagramUrl}
             onChange={(e) => {
               setInstagramUrl(e.target.value);
-              if (errors.instagram_url) setErrors((p) => ({ ...p, instagram_url: undefined, general: undefined }));
+              if (errors.instagram_url) setErrors((p) => ({ ...p, instagram_url: undefined }));
+              clearGeneralError();
             }}
             error={errors.instagram_url}
             leftAddon={<Instagram className="w-4 h-4 text-pink-600" />}
-            helper="Optional if Facebook is provided"
+            helper="Optional if another profile is provided"
+          />
+
+          <Input
+            label="LinkedIn Profile URL"
+            placeholder="https://www.linkedin.com/in/yourname"
+            value={linkedinUrl}
+            onChange={(e) => {
+              setLinkedinUrl(e.target.value);
+              if (errors.linkedin_url) setErrors((p) => ({ ...p, linkedin_url: undefined }));
+              clearGeneralError();
+            }}
+            error={errors.linkedin_url}
+            leftAddon={<Linkedin className="w-4 h-4 text-blue-700" />}
+            helper="Optional if another profile is provided"
           />
 
           <div className="bg-mint-surface rounded-xl p-3 border border-forest-light/40">
             <p className="text-xs font-body text-forest font-medium">
-              ℹ️ At least one profile URL is required. Both are welcome.
+              ℹ️ At least one profile URL is required. All three are welcome.
             </p>
           </div>
 
@@ -139,7 +174,7 @@ const SocialMediaPage: React.FC = () => {
             variant="primary"
             size="lg"
             loading={mutation.isPending}
-            disabled={!facebookUrl && !instagramUrl}
+            disabled={!hasAtLeastOne}
             className="w-full"
           >
             Submit Social Media

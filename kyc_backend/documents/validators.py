@@ -21,17 +21,8 @@ LAT_LNG_RE = re.compile(r"@(-?\d+\.\d+),(-?\d+\.\d+)")
 
 
 def validate_google_maps_url(url: str) -> None:
-    """
-    Raise ValidationError if `url` is not a recognisable Google Maps pin URL.
-    Accepted formats:
-        https://maps.app.goo.gl/...
-        https://www.google.com/maps/...
-        https://google.com/maps/...
-        https://goo.gl/maps/...
-    """
     if not url:
-        return  # empty is handled by field required= flag
-
+        return
     if not any(pattern.match(url) for pattern in GOOGLE_MAPS_PATTERNS):
         raise ValidationError(
             _("Enter a valid Google Maps URL (e.g. https://maps.app.goo.gl/… or https://www.google.com/maps/…)"),
@@ -40,10 +31,6 @@ def validate_google_maps_url(url: str) -> None:
 
 
 def extract_lat_lng(url: str) -> tuple[float | None, float | None]:
-    """
-    Parse latitude and longitude from a full Google Maps URL.
-    Returns (None, None) if not found (e.g. short URLs).
-    """
     match = LAT_LNG_RE.search(url)
     if match:
         return float(match.group(1)), float(match.group(2))
@@ -58,9 +45,6 @@ KRA_PIN_RE = re.compile(r"^[A-Z]\d{9}[A-Z]$")
 
 
 def validate_kra_pin(value: str) -> None:
-    """
-    KRA PIN format: letter + 9 digits + letter, e.g. A000000000A
-    """
     if not KRA_PIN_RE.match(value.upper()):
         raise ValidationError(
             _("Enter a valid KRA PIN (format: A000000000A — one letter, 9 digits, one letter)."),
@@ -69,7 +53,7 @@ def validate_kra_pin(value: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# National ID validator (Kenya — 8 digits)
+# National ID validator
 # ---------------------------------------------------------------------------
 
 ID_NUMBER_RE = re.compile(r"^\d{7,8}$")
@@ -84,7 +68,7 @@ def validate_id_number(value: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Phone number validator (Kenyan format)
+# Phone number validator
 # ---------------------------------------------------------------------------
 
 KENYAN_PHONE_RE = re.compile(r"^(\+254|0)[17]\d{8}$")
@@ -127,10 +111,22 @@ def validate_file_extension(file) -> None:
 def validate_facebook_url(url: str) -> None:
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or "facebook.com" not in parsed.netloc:
-        raise ValidationError(_("Enter a valid Facebook profile URL."), code="invalid_facebook_url")
+        raise ValidationError(
+            _("Enter a valid Facebook profile URL."), code="invalid_facebook_url"
+        )
 
 
 def validate_instagram_url(url: str) -> None:
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or "instagram.com" not in parsed.netloc:
-        raise ValidationError(_("Enter a valid Instagram profile URL."), code="invalid_instagram_url")
+        raise ValidationError(
+            _("Enter a valid Instagram profile URL."), code="invalid_instagram_url"
+        )
+
+
+def validate_linkedin_url(url: str) -> None:
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or "linkedin.com" not in parsed.netloc:
+        raise ValidationError(
+            _("Enter a valid LinkedIn profile URL."), code="invalid_linkedin_url"
+        )

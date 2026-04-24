@@ -1,9 +1,11 @@
+from documents.serializers.referred_by import ReferredBySerializer
 from rest_framework.views import APIView
 
 from documents.models import (
     IdentityDocument,
     HomeAddress,
     OfficeAddress,
+    ReferredBy,
     SocialMedia,
     ContactDetails,
     NextOfKin,
@@ -49,7 +51,7 @@ class ContactDetailsView(KYCSectionMixin, APIView):
     section_name = "contact_details"
 
 
-# class NextOfKinView(KYCSectionMixin, APIView):
-#     model = NextOfKin
-#     serializer_class = NextOfKinSerializer
-#     section_name = "next_of_kin"
+class ReferredByView(KYCSectionMixin, APIView):
+    model = ReferredBy
+    serializer_class = ReferredBySerializer
+    section_name = "referred_by"

@@ -6,6 +6,7 @@ import type {
   SocialMediaPayload,
   ContactDetailsPayload,
   NextOfKinPayload,
+  ReferredByPayload,
 } from '../types/kyc';
 
 export const getSectionStatus = (): Promise<KycStatusResponse> =>
@@ -71,3 +72,6 @@ export const submitContactDetails = (
 
 export const submitNextOfKin = (data: NextOfKinPayload): Promise<SectionSubmitResponse> =>
   apiClient.post('/applicant/kyc/next-of-kin/', data).then((r) => r.data);
+
+export const submitReferredBy = (data: ReferredByPayload): Promise<SectionSubmitResponse> =>
+  apiClient.post('/applicant/kyc/referred-by/', data).then((r) => r.data);
